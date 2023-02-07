@@ -1,6 +1,5 @@
 <%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
 <%@ page contentType="text/html;charset=UTF-8" %>
-<%@ page import="java.time.format.DateTimeFormatter" %>
 <style>
     <%@include file="/WEB-INF/css/style.css" %>
 </style>
@@ -20,15 +19,15 @@
         <th></th>
         <th></th>
     </tr>
-    <c:set var="pattern" value="${DateTimeFormatter.ofPattern('yyyy-MM-dd HH:mm')}"/>
+    <c:set var="pattern" value="${requestScope.pattern}"/>
     <c:forEach var="meal" items="${requestScope.mealsTo}">
         <c:set var="exceed" value="${meal.excess ? 'exceeded' : 'notExceeded'}"/>
-        <tr>
-            <td class="${exceed}">${meal.dateTime.format(pattern)}</td>
-            <td class="${exceed}">${meal.description}</td>
-            <td class="${exceed}">${meal.calories}</td>
-            <td>Update</td>
-            <td>Delete</td>
+        <tr class="${exceed}">
+            <td>${meal.dateTime.format(pattern)}</td>
+            <td>${meal.description}</td>
+            <td>${meal.calories}</td>
+            <td class="simple">Update</td>
+            <td class="simple">Delete</td>
         </tr>
     </c:forEach>
 </table>

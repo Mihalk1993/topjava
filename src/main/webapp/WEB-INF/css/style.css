@@ -8,6 +8,10 @@ th {
     font-size: 16px;
 }
 
+.simple {
+    color: black;
+}
+
 .exceeded {
     color: red;
 }
