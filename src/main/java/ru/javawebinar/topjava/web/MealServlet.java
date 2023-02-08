@@ -1,6 +1,7 @@
 package ru.javawebinar.topjava.web;
 
 import org.slf4j.Logger;
+import ru.javawebinar.topjava.model.MealCRUDImpl;
 import ru.javawebinar.topjava.model.MealTo;
 
 import javax.servlet.ServletException;
@@ -10,6 +11,7 @@ import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.time.LocalTime;
 import java.time.format.DateTimeFormatter;
+import java.util.Comparator;
 import java.util.List;
 
 import static org.slf4j.LoggerFactory.getLogger;
@@ -25,7 +27,8 @@ public class MealServlet extends HttpServlet {
 
         request.setAttribute("pattern", PATTERN);
 
-        List<MealTo> mealsTo = filteredByStreams(meals, LocalTime.MIN, LocalTime.MAX, CALORIES_PER_DAY);
+        List<MealTo> mealsTo = filteredByStreams(MealCRUDImpl.getInstance().getMeals(), LocalTime.MIN, LocalTime.MAX, CALORIES_PER_DAY);
+        mealsTo.sort(Comparator.comparing(MealTo::getDateTime));
         request.setAttribute("mealsTo", mealsTo);
 
         request.getRequestDispatcher("/meals.jsp").forward(request, response);
