@@ -4,11 +4,9 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.util.Objects;
-import java.util.concurrent.atomic.AtomicInteger;
+
 
 public class Meal {
-    private static AtomicInteger atomicCount = new AtomicInteger(0);
-
     private final Integer id;
 
     private final LocalDateTime dateTime;
@@ -18,10 +16,7 @@ public class Meal {
     private final int calories;
 
     public Meal(LocalDateTime dateTime, String description, int calories) {
-        this.dateTime = dateTime;
-        this.description = description;
-        this.calories = calories;
-        this.id = atomicCount.getAndIncrement();
+        this(0, dateTime, description, calories);
     }
 
     public Meal(Integer id, LocalDateTime dateTime, String description, int calories) {
@@ -55,7 +50,6 @@ public class Meal {
         return dateTime.toLocalTime();
     }
 
-
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
@@ -68,6 +62,4 @@ public class Meal {
     public int hashCode() {
         return Objects.hash(id);
     }
-
-
 }

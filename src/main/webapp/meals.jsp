@@ -27,8 +27,8 @@
             <td>${meal.dateTime.format(pattern)}</td>
             <td>${meal.description}</td>
             <td>${meal.calories}</td>
-            <td class="simple"><a href="editMeal?action=update&mealId=<c:out value="${meal.id}"/>">Update</a></td>
-            <td class="simple"><a href="editMeal?action=delete&mealId=<c:out value="${meal.id}"/>">Delete</a></td>
+            <td class="simple"><a href="editMeal?action=update&mealId=${meal.id}">Update</a></td>
+            <td class="simple"><a href="editMeal?action=delete&mealId=${meal.id}">Delete</a></td>
         </tr>
     </c:forEach>
 </table>
