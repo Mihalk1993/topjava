@@ -40,7 +40,10 @@
             <label for="endTime">До времени (исключая)</label>
             <input type="time" value="${param.endTime}" name="endTime" id="endTime">
         </div>
-        <button type="submit">Отфильтровать</button>
+        <div>
+            <input type="hidden" name="action" value="filter">
+            <button type="submit">Отфильтровать</button>
+        </div>
     </form>
     <table border="1" cellpadding="8" cellspacing="0">
         <thead>

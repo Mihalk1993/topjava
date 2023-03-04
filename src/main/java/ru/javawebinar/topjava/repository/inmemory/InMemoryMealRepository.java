@@ -5,15 +5,15 @@ import ru.javawebinar.topjava.model.Meal;
 import ru.javawebinar.topjava.repository.MealRepository;
 import ru.javawebinar.topjava.util.DateTimeUtil;
 import ru.javawebinar.topjava.util.MealsUtil;
-import ru.javawebinar.topjava.util.exception.NotFoundException;
 
-import java.time.LocalDateTime;
-import java.util.Collection;
+import java.time.LocalDate;
+import java.util.Comparator;
+import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicInteger;
+import java.util.function.Predicate;
 import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 @Component
 public class InMemoryMealRepository implements MealRepository {
@@ -26,57 +26,58 @@ public class InMemoryMealRepository implements MealRepository {
 
     @Override
     public Meal save(Meal meal, int userId) {
-        if (meal.getUserId() == userId) {
-            if (meal.isNew()) {
-                meal.setId(counter.incrementAndGet());
-                repository.put(meal.getId(), meal);
-                return meal;
-            }
-            // handle case: update, but not present in storage
-            return repository.computeIfPresent(meal.getId(), (id, oldMeal) -> meal);
-        } else {
-            throw new NotFoundException("You don't have an access for this meal.");
+        if (meal == null) {
+            return null;
         }
+        if (meal.getUserId() == null) meal.setUserId(userId);
+        if (meal.isNew()) {
+            meal.setId(counter.incrementAndGet());
+            repository.put(meal.getId(), meal);
+            return meal;
+        } else {
+            int mealId = meal.getId();
+            Meal existingMeal = repository.get(mealId);
+            if (existingMeal.getUserId() == userId) {
+                return repository.computeIfPresent(mealId, (id, oldMeal) -> meal);
+            }
+        }
+        return null;
     }
 
     @Override
     public boolean delete(int id, int userId) {
-        if (repository.get(id) == null) throw new NotFoundException("Meal with this id doesn't exist");
-        if (repository.get(id).getUserId() == userId) {
+        Meal meal = repository.get(id);
+        if (meal != null && meal.getUserId() == userId) {
             return repository.remove(id) != null;
-        } else {
-            throw new NotFoundException("You don't have an access for this meal.");
         }
+        return false;
     }
 
     @Override
     public Meal get(int id, int userId) {
-        if (repository.get(id) == null) throw new NotFoundException("Meal with this id doesn't exist");
-        if (repository.get(id).getUserId() == userId) {
-            return repository.get(id);
-        } else {
-            throw new NotFoundException("You don't have an access for this meal.");
+        Meal meal = repository.get(id);
+        if (meal != null && meal.getUserId() == userId) {
+            return meal;
         }
+        return null;
     }
 
     @Override
-    public Collection<Meal> getAll(int userId) {
-        return getSortedMealsStreamByUserId(userId)
-                .collect(Collectors.toList());
+    public List<Meal> getAll(int userId) {
+        return getSortedMealsStreamByUserId(userId, meal -> true);
     }
 
     @Override
-    public Collection<Meal> getAll(LocalDateTime startDate, LocalDateTime endDate, int userId) {
-        return getSortedMealsStreamByUserId(userId)
-                .filter(meal -> DateTimeUtil.isBetweenHalfOpen(meal.getDate().atStartOfDay(), startDate, endDate))
-                .collect(Collectors.toList());
+    public List<Meal> getAllFiltered(LocalDate startDate, LocalDate endDate, int userId) {
+        return getSortedMealsStreamByUserId(userId,
+                meal -> DateTimeUtil.isBetweenHalfOpen(meal.getDate(), startDate, endDate, true));
     }
 
-    private Stream<Meal> getSortedMealsStreamByUserId(int userId) {
+    private List<Meal> getSortedMealsStreamByUserId(int userId, Predicate<Meal> filter) {
         return repository.values().stream()
                 .filter(meal -> meal.getUserId() == userId)
-                .sorted((meal1, meal2) -> meal2.getDateTime().compareTo(meal1.getDateTime()));
+                .filter(filter)
+                .sorted(Comparator.comparing(Meal::getDateTime).reversed())
+                .collect(Collectors.toList());
     }
 }
-
-
