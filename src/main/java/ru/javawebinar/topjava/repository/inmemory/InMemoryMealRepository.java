@@ -17,7 +17,7 @@ import java.util.stream.Collectors;
 
 @Component
 public class InMemoryMealRepository implements MealRepository {
-    private final Map<Integer, Meal> repository = new ConcurrentHashMap<>();
+    private final Map<Integer, Map<Integer, Meal>> repository = new ConcurrentHashMap<>();
     private final AtomicInteger counter = new AtomicInteger(0);
 
     {
@@ -30,17 +30,18 @@ public class InMemoryMealRepository implements MealRepository {
             throw new IllegalArgumentException("Cannot save a null meal");
         }
 
+        Map<Integer, Meal> userMeals = repository.computeIfAbsent(userId, k -> new ConcurrentHashMap<>());
         if (meal.isNew()) {
             meal.setId(counter.incrementAndGet());
             meal.setUserId(userId);
-            repository.put(meal.getId(), meal);
+            userMeals.put(meal.getId(), meal);
             return meal;
         } else {
             int mealId = meal.getId();
-            Meal existingMeal = repository.get(mealId);
+            Meal existingMeal = userMeals.get(mealId);
             if (existingMeal != null && existingMeal.getUserId() == userId) {
                 meal.setUserId(userId);
-                return repository.computeIfPresent(mealId, (id, oldMeal) -> meal);
+                return userMeals.computeIfPresent(mealId, (id, oldMeal) -> meal);
             }
         }
         return null;
@@ -49,12 +50,14 @@ public class InMemoryMealRepository implements MealRepository {
     @Override
     public boolean delete(int id, int userId) {
         Meal meal = get(id, userId);
-        return meal != null && repository.remove(id) != null;
+        Map<Integer, Meal> userMeals = repository.get(userId);
+        return meal != null && userMeals.remove(id) != null;
     }
 
     @Override
     public Meal get(int id, int userId) {
-        Meal meal = repository.get(id);
+        Map<Integer, Meal> userMeals = repository.get(userId);
+        Meal meal = userMeals.get(id);
         return meal != null && meal.getUserId() == userId ? meal : null;
     }
 
@@ -70,7 +73,8 @@ public class InMemoryMealRepository implements MealRepository {
     }
 
     private List<Meal> getSortedMealsStreamByUserId(int userId, Predicate<Meal> filter) {
-        return repository.values().stream()
+        Map<Integer, Meal> userMeals = repository.get(userId);
+        return userMeals.values().stream()
                 .filter(meal -> meal.getUserId() == userId)
                 .filter(filter)
                 .sorted(Comparator.comparing(Meal::getDateTime).reversed())
