@@ -27,17 +27,19 @@ public class InMemoryMealRepository implements MealRepository {
     @Override
     public Meal save(Meal meal, int userId) {
         if (meal == null) {
-            return null;
+            throw new IllegalArgumentException("Cannot save a null meal");
         }
-        if (meal.getUserId() == null) meal.setUserId(userId);
+
         if (meal.isNew()) {
             meal.setId(counter.incrementAndGet());
+            meal.setUserId(userId);
             repository.put(meal.getId(), meal);
             return meal;
         } else {
             int mealId = meal.getId();
             Meal existingMeal = repository.get(mealId);
-            if (existingMeal.getUserId() == userId) {
+            if (existingMeal != null && existingMeal.getUserId() == userId) {
+                meal.setUserId(userId);
                 return repository.computeIfPresent(mealId, (id, oldMeal) -> meal);
             }
         }
@@ -46,20 +48,14 @@ public class InMemoryMealRepository implements MealRepository {
 
     @Override
     public boolean delete(int id, int userId) {
-        Meal meal = repository.get(id);
-        if (meal != null && meal.getUserId() == userId) {
-            return repository.remove(id) != null;
-        }
-        return false;
+        Meal meal = get(id, userId);
+        return meal != null && repository.remove(id) != null;
     }
 
     @Override
     public Meal get(int id, int userId) {
         Meal meal = repository.get(id);
-        if (meal != null && meal.getUserId() == userId) {
-            return meal;
-        }
-        return null;
+        return meal != null && meal.getUserId() == userId ? meal : null;
     }
 
     @Override
@@ -70,7 +66,7 @@ public class InMemoryMealRepository implements MealRepository {
     @Override
     public List<Meal> getAllFiltered(LocalDate startDate, LocalDate endDate, int userId) {
         return getSortedMealsStreamByUserId(userId,
-                meal -> DateTimeUtil.isBetweenHalfOpen(meal.getDate(), startDate, endDate, true));
+                meal -> DateTimeUtil.isBetween(meal.getDate(), startDate, endDate, true));
     }
 
     private List<Meal> getSortedMealsStreamByUserId(int userId, Predicate<Meal> filter) {
