@@ -35,10 +35,10 @@ public class MealService {
     }
 
     public List<Meal> getAll(int userId) {
-        return new ArrayList<>(repository.getAll(userId));
+        return repository.getAll(userId);
     }
 
     public List<Meal> getAllFiltered(LocalDate startDate, LocalDate endDate, int userId) {
-        return new ArrayList<>(repository.getAllFiltered(startDate, endDate, userId));
+        return repository.getAllFiltered(startDate, endDate, userId);
     }
 }
