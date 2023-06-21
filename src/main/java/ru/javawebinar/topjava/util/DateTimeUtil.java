@@ -23,6 +23,14 @@ public class DateTimeUtil {
         return localDate != null ? localDate.plusDays(1).atStartOfDay() : MAX_DATE;
     }
 
+    public static LocalDateTime minDateIfNull(LocalDateTime localDateTime) {
+        return localDateTime != null ? localDateTime : MIN_DATE;
+    }
+
+    public static LocalDateTime maxDateIfNull(LocalDateTime localDateTime) {
+        return localDateTime != null ? localDateTime : MAX_DATE;
+    }
+
     public static String toString(LocalDateTime ldt) {
         return ldt == null ? "" : ldt.format(DATE_TIME_FORMATTER);
     }

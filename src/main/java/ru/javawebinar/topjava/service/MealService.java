@@ -6,15 +6,14 @@ import ru.javawebinar.topjava.model.Meal;
 import ru.javawebinar.topjava.repository.MealRepository;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.List;
 
-import static ru.javawebinar.topjava.util.DateTimeUtil.atStartOfDayOrMin;
-import static ru.javawebinar.topjava.util.DateTimeUtil.atStartOfNextDayOrMax;
+import static ru.javawebinar.topjava.util.DateTimeUtil.*;
 import static ru.javawebinar.topjava.util.ValidationUtil.checkNotFoundWithId;
 
 @Service
 public class MealService {
-
     private final MealRepository repository;
 
     public MealService(MealRepository repository) {
@@ -33,13 +32,18 @@ public class MealService {
         return repository.getBetweenHalfOpen(atStartOfDayOrMin(startDate), atStartOfNextDayOrMax(endDate), userId);
     }
 
+    public List<Meal> getBetweenDateTimeInclusive(@Nullable LocalDateTime startDateTime,
+                                                  @Nullable LocalDateTime endDateTime,
+                                                  int userId) {
+        return repository.getBetweenHalfOpen(minDateIfNull(startDateTime), maxDateIfNull(endDateTime), userId);
+    }
+
     public List<Meal> getAll(int userId) {
         return repository.getAll(userId);
     }
 
-    public Meal update(Meal meal, int userId) {
+    public void update(Meal meal, int userId) {
         checkNotFoundWithId(repository.save(meal, userId), meal.getId());
-        return meal;
     }
 
     public Meal create(Meal meal, int userId) {

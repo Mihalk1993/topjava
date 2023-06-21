@@ -10,7 +10,6 @@ import org.springframework.stereotype.Repository;
 import ru.javawebinar.topjava.model.Meal;
 import ru.javawebinar.topjava.repository.MealRepository;
 
-import java.sql.Timestamp;
 import java.time.LocalDateTime;
 import java.util.HashMap;
 import java.util.List;
@@ -37,7 +36,7 @@ public class JdbcMealRepository implements MealRepository {
     public Meal save(Meal meal, int userId) {
         Map<String, Object> parameters = new HashMap<>();
         parameters.put("user_id", userId);
-        parameters.put("datetime", Timestamp.valueOf(meal.getDateTime()));
+        parameters.put("datetime", meal.getDateTime());
         parameters.put("description", meal.getDescription());
         parameters.put("calories", meal.getCalories());
 
@@ -48,7 +47,7 @@ public class JdbcMealRepository implements MealRepository {
             parameters.put("id", meal.getId());
             if (namedParameterJdbcTemplate.update(
                     "UPDATE meals SET user_id=:user_id, datetime=:datetime, description=:description, " +
-                            "calories=:calories WHERE id=:id", parameters) == 0) {
+                            "calories=:calories WHERE id=:id AND user_id=:user_id", parameters) == 0) {
                 return null;
             }
         }

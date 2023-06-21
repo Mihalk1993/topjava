@@ -1,1 +1,0 @@
-CREATE UNIQUE INDEX meals_user_datetime_idx ON meals (user_id, dateTime);
