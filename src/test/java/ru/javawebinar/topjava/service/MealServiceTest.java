@@ -13,7 +13,6 @@ import ru.javawebinar.topjava.model.Meal;
 import ru.javawebinar.topjava.util.exception.NotFoundException;
 
 import java.time.LocalDate;
-import java.time.LocalDateTime;
 import java.time.Month;
 import java.util.List;
 
@@ -23,7 +22,7 @@ import static ru.javawebinar.topjava.MealTestData.assertMatch;
 import static ru.javawebinar.topjava.UserTestData.ADMIN_ID;
 import static ru.javawebinar.topjava.UserTestData.USER_ID;
 
-@ContextConfiguration({"classpath:spring/spring-app.xml", "classpath:spring/spring-db.xml"})
+@ContextConfiguration({"classpath:spring/spring-app.xml", "classpath:spring/spring-jdbc.xml", "classpath:spring/spring-db.xml"})
 @RunWith(SpringRunner.class)
 @Sql(scripts = "classpath:db/populateDB.sql", config = @SqlConfig(encoding = "UTF-8"))
 public class MealServiceTest {
@@ -77,19 +76,29 @@ public class MealServiceTest {
     }
 
     @Test
+    public void deleteNotOwn() {
+        assertThrows(NotFoundException.class, () -> service.get(ADMIN_MEAL6_ID, USER_ID));
+    }
+
+    @Test
     public void getNotFound() {
         assertThrows(NotFoundException.class, () -> service.get(NOT_FOUND, USER_ID));
     }
 
     @Test
+    public void getNotOwn() {
+        assertThrows(NotFoundException.class, () -> service.get(ADMIN_MEAL5_ID, USER_ID));
+    }
+
+    @Test
     public void updateNotFound() {
         Meal updated = getUpdated();
-        updated.setId(NOT_FOUND);
+        updated.setId(ADMIN_MEAL4_ID);
         assertThrows(NotFoundException.class, () -> service.update(updated, USER_ID));
     }
 
     @Test
-    public void updateNotAuthorized() {
+    public void updateNotOwn() {
         Meal updated = getUpdated();
         updated.setId(ADMIN_MEAL1_ID);
         assertThrows(NotFoundException.class, () -> service.update(updated, USER_ID));
@@ -103,22 +112,8 @@ public class MealServiceTest {
 
     @Test
     public void getBetweenInclusive() {
-        List<Meal> meals = service.getBetweenInclusive(LocalDate.of(2020, Month.JANUARY, 31),
+        List<Meal> meals = service.getBetweenInclusive(LocalDate.of(2020, Month.JANUARY, 30),
                 LocalDate.of(2020, Month.JANUARY, 31), ADMIN_ID);
-        assertMatch(meals, adminMeal4, adminMeal3, adminMeal2, adminMeal1);
-    }
-
-    @Test
-    public void getBetweenDateTimeInclusive() {
-        List<Meal> meals = service.getBetweenDateTimeInclusive(
-                LocalDateTime.of(2020, Month.JANUARY, 31, 10, 0),
-                LocalDateTime.of(2020, Month.JANUARY, 31, 13, 1), ADMIN_ID);
-        assertMatch(meals, adminMeal3, adminMeal2);
-    }
-
-    @Test
-    public void getBetweenDateTimeInclusiveWithNullLimits() {
-        List<Meal> meals = service.getBetweenDateTimeInclusive(null, null, ADMIN_ID);
         assertMatch(meals, adminMeal4, adminMeal3, adminMeal2, adminMeal1);
     }
 

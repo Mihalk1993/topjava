@@ -4,6 +4,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.support.DataAccessUtils;
 import org.springframework.jdbc.core.BeanPropertyRowMapper;
 import org.springframework.jdbc.core.JdbcTemplate;
+import org.springframework.jdbc.core.namedparam.MapSqlParameterSource;
 import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
 import org.springframework.jdbc.core.simple.SimpleJdbcInsert;
 import org.springframework.stereotype.Repository;
@@ -11,9 +12,7 @@ import ru.javawebinar.topjava.model.Meal;
 import ru.javawebinar.topjava.repository.MealRepository;
 
 import java.time.LocalDateTime;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
 @Repository
 public class JdbcMealRepository implements MealRepository {
@@ -34,20 +33,20 @@ public class JdbcMealRepository implements MealRepository {
 
     @Override
     public Meal save(Meal meal, int userId) {
-        Map<String, Object> parameters = new HashMap<>();
-        parameters.put("user_id", userId);
-        parameters.put("datetime", meal.getDateTime());
-        parameters.put("description", meal.getDescription());
-        parameters.put("calories", meal.getCalories());
+        MapSqlParameterSource map = new MapSqlParameterSource()
+                .addValue("userId", userId)
+                .addValue("datetime", meal.getDateTime())
+                .addValue("description", meal.getDescription())
+                .addValue("calories", meal.getCalories());
 
         if (meal.isNew()) {
-            Number newKey = insertMeal.executeAndReturnKey(parameters);
+            Number newKey = insertMeal.executeAndReturnKey(map);
             meal.setId(newKey.intValue());
         } else {
-            parameters.put("id", meal.getId());
+            map.addValue("id", meal.getId());
             if (namedParameterJdbcTemplate.update(
-                    "UPDATE meals SET user_id=:user_id, datetime=:datetime, description=:description, " +
-                            "calories=:calories WHERE id=:id AND user_id=:user_id", parameters) == 0) {
+                    "UPDATE meals SET datetime=:datetime, description=:description, " +
+                            "calories=:calories WHERE id=:id AND user_id=:userId", map) == 0) {
                 return null;
             }
         }

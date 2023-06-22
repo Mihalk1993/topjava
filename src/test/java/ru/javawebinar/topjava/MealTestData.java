@@ -16,6 +16,9 @@ public class MealTestData {
     public static final int ADMIN_MEAL2_ID = ADMIN_MEAL1_ID + 1;
     public static final int ADMIN_MEAL3_ID = ADMIN_MEAL2_ID + 1;
     public static final int ADMIN_MEAL4_ID = ADMIN_MEAL3_ID + 1;
+    public static final int ADMIN_MEAL5_ID = ADMIN_MEAL4_ID + 1;
+    public static final int ADMIN_MEAL6_ID = ADMIN_MEAL5_ID + 1;
+    public static final int ADMIN_MEAL7_ID = ADMIN_MEAL6_ID + 1;
     public static final int NOT_FOUND = 10;
 
     public static final Meal userMeal1 = new Meal(USER_MEAL1_ID, LocalDateTime.of(2020, 1, 30, 10, 0), "Завтрак", 500);
@@ -25,6 +28,9 @@ public class MealTestData {
     public static final Meal adminMeal2 = new Meal(ADMIN_MEAL2_ID, LocalDateTime.of(2020, 1, 31, 10, 0), "Завтрак", 1000);
     public static final Meal adminMeal3 = new Meal(ADMIN_MEAL3_ID, LocalDateTime.of(2020, 1, 31, 13, 0), "Обед", 500);
     public static final Meal adminMeal4 = new Meal(ADMIN_MEAL4_ID, LocalDateTime.of(2020, 1, 31, 20, 0), "Ужин", 410);
+    public static final Meal adminMeal5 = new Meal(ADMIN_MEAL5_ID, LocalDateTime.of(2020, 2, 1, 10, 30), "Завтрак", 500);
+    public static final Meal adminMeal6 = new Meal(ADMIN_MEAL6_ID, LocalDateTime.of(2020, 2, 1, 12, 15), "Обед", 1000);
+    public static final Meal adminMeal7 = new Meal(ADMIN_MEAL7_ID, LocalDateTime.of(2020, 2, 1, 21, 10), "Ужин", 500);
 
     public static Meal getNew() {
         return new Meal(LocalDateTime.of(2020, 1, 30, 22, 30), "New", 800);

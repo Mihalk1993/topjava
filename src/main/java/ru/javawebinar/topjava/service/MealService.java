@@ -32,12 +32,6 @@ public class MealService {
         return repository.getBetweenHalfOpen(atStartOfDayOrMin(startDate), atStartOfNextDayOrMax(endDate), userId);
     }
 
-    public List<Meal> getBetweenDateTimeInclusive(@Nullable LocalDateTime startDateTime,
-                                                  @Nullable LocalDateTime endDateTime,
-                                                  int userId) {
-        return repository.getBetweenHalfOpen(minDateIfNull(startDateTime), maxDateIfNull(endDateTime), userId);
-    }
-
     public List<Meal> getAll(int userId) {
         return repository.getAll(userId);
     }
